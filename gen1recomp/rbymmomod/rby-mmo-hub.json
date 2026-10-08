@@ -1,0 +1,72 @@
+{
+    "_comment": "RBY MMO Hub egg for Pterodactyl",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-10-08T05:00:00+00:00",
+    "name": "RBY MMO Hub (Gen1Recomp)",
+    "author": "2304606+rainthefrog@users.noreply.github.com",
+    "description": "Standalone RBY MMO Hub server. Requires Node.js 22+.\n\nKanto, but your friends are in it.\n\nOther trainers walk the same routes you do — real sprites, names over their heads, a line in the corner when they talk. Bump into someone outside Viridian and trade on the spot. Or throw down, right there on the grass.\n\nA multiplayer mod for Gen1Recomp.",
+    "features": [],
+    "docker_images": {
+        "Node.js 22": "ghcr.io/parkervcp/yolks:nodejs_22"
+    },
+    "file_denylist": [],
+    "startup": "if [ ! -f /home/container/config.json ]; then node server/bin/rby-mmo-hub.js init --yes; fi; node server/bin/rby-mmo-hub.js start",
+    "config": {
+        "files": "{}",
+        "startup": "{\n    \"done\": \"RBY MMO hub listening on 0.0.0.0:\"\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\nset -e\n\ncd /mnt/server\n\necho \"Downloading RBY MMO Hub...\"\n\nif [ -d .git ]; then\n    git pull --ff-only\nelse\n    git clone --depth 1 https://github.com/alamops/RBYMMOMod.git .\nfi\n\nif [ ! -f server/bin/rby-mmo-hub.js ]; then\n    echo \"ERROR: RBY MMO Hub executable was not found.\"\n    exit 1\nfi\n\necho \"RBY MMO Hub installation complete.\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Maximum Players",
+            "description": "Maximum number of players allowed in the hub. Must be between 2 and 64.",
+            "env_variable": "RBY_MMO_MAX",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:2,64",
+            "field_type": "text"
+        },
+        {
+            "name": "Port",
+            "description": "Port used by the RBY MMO Hub.",
+            "env_variable": "RBY_MMO_PORT",
+            "default_value": "7788",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Generation",
+            "description": "Game generation. 1 = Red/Blue/Yellow, 2 = Gold/Silver/Crystal.",
+            "env_variable": "RBY_MMO_GENERATION",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:1,2",
+            "field_type": "text"
+        },
+        {
+            "name": "Log Level",
+            "description": "Hub log level. Allowed values: debug, info, warn, error, silent.",
+            "env_variable": "RBY_MMO_LOG_LEVEL",
+            "default_value": "info",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:debug,info,warn,error,silent",
+            "field_type": "text"
+        }
+    ]
+}
