@@ -4,27 +4,27 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-10-08T05:00:00+00:00",
+    "exported_at": "2026-10-08T22:22:01-04:00",
     "name": "RBY MMO Hub (Gen1Recomp)",
     "author": "2304606+rainthefrog@users.noreply.github.com",
-    "description": "Standalone RBY MMO Hub server. Requires Node.js 22+.\n\nKanto, but your friends are in it.\n\nOther trainers walk the same routes you do — real sprites, names over their heads, a line in the corner when they talk. Bump into someone outside Viridian and trade on the spot. Or throw down, right there on the grass.\n\nA multiplayer mod for Gen1Recomp.",
+    "description": "Standalone RBY MMO Hub server. Requires Node.js 22+.\r\n\r\nKanto, but your friends are in it.\r\n\r\nOther trainers walk the same routes you do \u2014 real sprites, names over their heads, a line in the corner when they talk. Bump into someone outside Viridian and trade on the spot. Or throw down, right there on the grass.\r\n\r\nA multiplayer mod for Gen1Recomp.",
     "features": [],
     "docker_images": {
-        "Node.js 22": "ghcr.io/parkervcp/yolks:nodejs_22"
+        "ghcr.io\/parkervcp\/yolks:nodejs_22": "ghcr.io\/parkervcp\/yolks:nodejs_22"
     },
     "file_denylist": [],
-    "startup": "if [ ! -f /home/container/config.json ]; then node server/bin/rby-mmo-hub.js init --yes; fi; node server/bin/rby-mmo-hub.js start",
+    "startup": "[ -f config.json ] || node server\/bin\/rby-mmo-hub.js init --yes ${SERVER_JOIN_CODE:+--code \"$SERVER_JOIN_CODE\"}; node server\/bin\/rby-mmo-hub.js start",
     "config": {
         "files": "{}",
-        "startup": "{\n    \"done\": \"RBY MMO hub listening on 0.0.0.0:\"\n}",
+        "startup": "{}",
         "logs": "{}",
         "stop": "^C"
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\nset -e\n\ncd /mnt/server\n\necho \"Downloading RBY MMO Hub...\"\n\nif [ -d .git ]; then\n    git pull --ff-only\nelse\n    git clone --depth 1 https://github.com/alamops/RBYMMOMod.git .\nfi\n\nif [ ! -f server/bin/rby-mmo-hub.js ]; then\n    echo \"ERROR: RBY MMO Hub executable was not found.\"\n    exit 1\nfi\n\necho \"RBY MMO Hub installation complete.\"",
-            "container": "ghcr.io/parkervcp/installers:debian",
-            "entrypoint": "bash"
+            "script": "#!\/bin\/bash\r\nset -e\r\n\r\ncd \/mnt\/server\r\n\r\necho \"Downloading RBY MMO Hub...\"\r\n\r\nif [ -d .git ]; then\r\n    echo \"Existing repository found, updating...\"\r\n    git pull --ff-only\r\nelse\r\n    git clone --depth 1 https:\/\/github.com\/alamops\/RBYMMOMod.git .\r\nfi\r\n\r\nif [ ! -f server\/bin\/rby-mmo-hub.js ]; then\r\n    echo \"ERROR: RBY MMO Hub executable was not found.\"\r\n    exit 1\r\nfi\r\n\r\necho \"RBY MMO Hub installation complete.\"",
+            "container": "ghcr.io\/parkervcp\/installers:debian",
+            "entrypoint": "\/bin\/bash"
         }
     },
     "variables": [
@@ -35,22 +35,32 @@
             "default_value": "4",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|integer|between:2,64",
+            "rules": "required|integer|min:2|max:64",
             "field_type": "text"
         },
         {
-            "name": "Port",
-            "description": "Port used by the RBY MMO Hub.",
+            "name": "Server Port",
+            "description": "Port the RBY MMO Hub listens on inside the container.",
             "env_variable": "RBY_MMO_PORT",
             "default_value": "7788",
             "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|min:1|max:65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Log Level",
+            "description": "Server logging level.",
+            "env_variable": "RBY_MMO_LOG_LEVEL",
+            "default_value": "info",
+            "user_viewable": true,
             "user_editable": true,
-            "rules": "required|integer|between:1024,65535",
+            "rules": "required|string|in:debug,info,warn,error,silent",
             "field_type": "text"
         },
         {
             "name": "Generation",
-            "description": "Game generation. 1 = Red/Blue/Yellow, 2 = Gold/Silver/Crystal.",
+            "description": "Hub generation. 1 = Red\/Blue\/Yellow, 2 = Gold\/Silver\/Crystal.",
             "env_variable": "RBY_MMO_GENERATION",
             "default_value": "1",
             "user_viewable": true,
@@ -59,13 +69,13 @@
             "field_type": "text"
         },
         {
-            "name": "Log Level",
-            "description": "Hub log level. Allowed values: debug, info, warn, error, silent.",
-            "env_variable": "RBY_MMO_LOG_LEVEL",
-            "default_value": "info",
+            "name": "Server Join Code",
+            "description": "Optional alphanumeric join code required for players to connect to the hub. Leave blank to have the hub generate a code automatically.",
+            "env_variable": "SERVER_JOIN_CODE",
+            "default_value": "",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|string|in:debug,info,warn,error,silent",
+            "rules": "nullable|string|alpha_num|min:6|max:6",
             "field_type": "text"
         }
     ]
